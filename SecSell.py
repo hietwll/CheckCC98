@@ -26,16 +26,18 @@ class autoreply:
         self.exclu = []
         self.needid = {}
         self.needpage = {}
+        self.neednames = {}
         self.needtitle = {}
         self.idcontain = {}
         self.ids = []
         self.msg_from='664019449@qq.com'     #发送方邮箱
         self.passwd= 'ppegojettgowbbea'  #'ppegojettgowbbea'       #填入发送方邮箱的授权码
-        self.msg_to='835019084@qq.com'      #收件人邮箱
+        self.msg_to='1317890542@qq.com'      #收件人邮箱
         self.subject = ""
         self.mailcont = ""
         self.neednum = 0
         self.findflag = False
+        self.SendPic = False
         self.msg = MIMEMultipart('alternative')
         self.loginHeaders =  {
             'Host':'www.cc98.org',
@@ -84,6 +86,9 @@ class autoreply:
         for x in self.idcontain:
             self.exclu.append(x)
 
+        if len(self.exclu) >= 20:
+            self.exclu = self.exclu[-20:]
+
         file3 = open("exclude.txt",'w')
         for xx in self.exclu:
             file3.write(xx+'\n')
@@ -104,17 +109,21 @@ class autoreply:
     def chkconts(self):
         print('====================log: Checking for my needs!====================')
         for sid in self.ids:
+            # print('====================log: Checking sid %s!===================='%str(sid))
             if(str(sid) not in self.exclu):
                 myurl = self.baseurl2 + str(sid) + "/post?from=0&size=10"
                 pcont = self.myweb(myurl)
-                for myneed in self.needs:
-                    if(pcont.find(myneed)!=-1):
-                        self.needid[myneed].append(str(sid))
-                        jh = json.loads(pcont)
-                        self.needpage[myneed].append(jh[0]['content'])
-                        self.needtitle[myneed].append(jh[0]['title'])
-                        self.findflag = True
-                        print('====================log: MyNeeds %s Found!===================='%myneed)
+                for allnames in self.neednames:
+                    for myneed in self.neednames[allnames]:
+                        # print('====================log: Checking MyNeeds %s, Topic id %s!===================='%(myneed,str(sid)))
+                        if(pcont.find(myneed)!=-1):
+                            self.needid[allnames].append(str(sid))
+                            jh = json.loads(pcont)
+                            self.needpage[allnames].append(jh[0]['content'])
+                            self.needtitle[allnames].append(jh[0]['title'])
+                            self.findflag = True
+                            print('====================log: MyNeeds %s Found!===================='%myneed)
+        print('====================log: Checking Ended!====================')
 
 
 
@@ -128,6 +137,7 @@ class autoreply:
                 content = response.read().decode('utf-8')
                 return content
             except:
+                print('====================log:My web service go wrong %d times!===================='%IFlg)
                 IFlg = IFlg + 1
                 pass
         return content
@@ -135,7 +145,15 @@ class autoreply:
     def readtxt(self):
         file1 = open("need.txt",encoding='utf-8')
         for line in file1:
-            self.needs.append(line.strip('\n'))
+            words = re.split('[ ;,]',line)
+            self.needs.append(words[0].strip())
+            for xx in words:
+                if xx.strip() != '':
+                    if words[0].strip() not in self.neednames:
+                        self.neednames[words[0].strip()]=[words[0].strip()]
+                    else:
+                        self.neednames[words[0].strip()].append(xx.strip())
+                
         file1.close
         file2 = open("exclude.txt",encoding='utf-8')
         for line in file2:
@@ -206,7 +224,7 @@ class autoreply:
             ctsplit = incont.split('\n')
             retcont = ''
             for cont in ctsplit:
-                if(cont.find('[img]')!=-1):
+                if(cont.find('[img]')!=-1 and self.SendPic):
                     retcont = retcont + self.parsefig(cont,iid)
                 else:
                     retcont = retcont + '<div>' + cont + '</div>'
@@ -231,7 +249,7 @@ class autoreply:
         try:
             # print(ffurl)
             request = urllib.request.Request(ffurl)
-            response = urllib.request.urlopen(request,timeout=300)
+            response = urllib.request.urlopen(request,timeout=1000)
             # for i in range(100):
             #   c = response.read()
             #   if(len(c)==picsize):
