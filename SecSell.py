@@ -30,9 +30,9 @@ class autoreply:
         self.needtitle = {}
         self.idcontain = {}
         self.ids = []
-        self.msg_from='664019449@qq.com'     #发送方邮箱
-        self.passwd= 'ppegojettgowbbea'  #'ppegojettgowbbea'       #填入发送方邮箱的授权码
-        self.msg_to='1317890542@qq.com'      #收件人邮箱
+        self.msg_from='xxxxxxxxx@qq.com'     #发送方邮箱
+        self.passwd= 'xxxxxxxxxxxxx'       #填入发送方邮箱的授权码
+        self.msg_to='yyyyyyyyyy@qq.com'      #收件人邮箱
         self.subject = ""
         self.mailcont = ""
         self.neednum = 0
@@ -171,13 +171,13 @@ class autoreply:
         for x in self.needid:
             if len(self.needid[x]):
                 finds = finds + x + ","
-        self.subject ="碧莲！碧莲！CC98上出现了"+finds.strip(',')+"!"
+        self.subject ="快 ！CC98上出现了"+finds.strip(',')+"!"
         self.editcont()
         msgText = MIMEText(self.mailcont,"html",'utf-8')
         self.msg.attach(msgText)
         self.msg['Subject'] = Header(self.subject,'utf-8').encode()
         self.msg['From'] = _format_addr('玉泉吴彦祖<%s>'%self.msg_from)
-        self.msg['To'] = _format_addr('胜利商店王美丽<%s>'%self.msg_to)
+        self.msg['To'] = _format_addr('谁谁<%s>'%self.msg_to)
         print('====================log: Emails Prepared!====================')
         # print(self.mailcont)
         Iflags = 0
